@@ -117,8 +117,8 @@ async function fetchListings() {
   }
 }
 
-// ---- CRON (8AM DAILY) ----
-cron.schedule("0 8 * * *", fetchListings);
+// ---- CRON DISABLED ----
+// Cron job disabled - using manual refresh button instead
 
 // ---- API ----
 
@@ -141,12 +141,7 @@ app.post("/refresh", async (req, res) => {
 });
 
 // ---- START ----
-app.listen(3000, async () => {
+app.listen(3000, () => {
   console.log("Server running on port 3000");
-  // Fetch listings on startup for testing
-  try {
-    await fetchListings();
-  } catch (e) {
-    console.error("Startup fetch error:", e.message);
-  }
+  console.log("Use POST /refresh to fetch new listings");
 });

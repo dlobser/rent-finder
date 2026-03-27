@@ -3,80 +3,697 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rent Finder</title>
+    <title>Rent Finder - Brooklyn Apartments</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .listing { border: 1px solid #ccc; padding: 10px; margin: 10px 0; border-radius: 5px; }
-        .filters { margin-bottom: 20px; }
-        .filters input, .filters select { margin: 0 10px; padding: 5px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+
+        .control-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        input, select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 8px 12px;
+            font-size: 0.85em;
+        }
+
+        .btn-warning:hover {
+            transform: scale(1.05);
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .countdown {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #f5576c;
+        }
+
+        /* Dropdowns */
+        .dropdown-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .dropdown-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-btn:hover {
+            border-color: #667eea;
+            background: #f9f9f9;
+        }
+
+        .dropdown-content {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            margin-top: 10px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .dropdown-content.active {
+            display: block;
+        }
+
+        /* Listings */
+        .listings-header {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .listings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .listing {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .listing:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .listing-saved {
+            border: 3px solid #ffc107;
+        }
+
+        .listing-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .listing-address {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+            flex: 1;
+        }
+
+        .badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .price {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #38ef7d;
+            margin: 10px 0;
+        }
+
+        .property-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 12px 0;
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .info-item {
+            font-size: 0.9em;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        .agent-info {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            padding: 12px;
+            border-radius: 10px;
+            margin: 12px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .agent-title {
+            font-size: 0.8em;
+            font-weight: 600;
+            color: #667eea;
+            text-transform: uppercase;
+        }
+
+        .agent-name {
+            font-weight: 600;
+            color: #333;
+            margin: 4px 0;
+        }
+
+        .agent-contact {
+            font-size: 0.85em;
+            color: #666;
+            margin: 2px 0;
+        }
+
+        .listing-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            flex: 1;
+            min-width: 100px;
+            padding: 8px 12px;
+            font-size: 0.85em;
+        }
+
+        .btn-map {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-save {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-saved {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-hide {
+            background: #dc3545;
+            color: white;
+        }
+
+        .empty-message {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .saved-item {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .saved-item-text {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .saved-price {
+            color: #38ef7d;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .listings-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .control-row {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>Rent Finder - Brooklyn, NY 11215</h1>
+    <div class="container">
+        <header>
+            <h1>🏠 Rent Finder</h1>
+            <p class="subtitle">Brooklyn, NY 11215 - Find Your Perfect Apartment</p>
+        </header>
 
-    <div class="filters">
-        <label>Min Price: <input type="number" id="minPrice" value="2500"></label>
-        <label>Max Price: <input type="number" id="maxPrice" value="6500"></label>
-        <label>Min Bedrooms: <input type="number" id="minBedrooms" value="0"></label>
-        <label>Max Bedrooms: <input type="number" id="maxBedrooms" value="5"></label>
-        <button onclick="applyFilters()">Apply Filters</button>
-        <button onclick="resetFilters()">Reset</button>
+        <div class="control-panel">
+            <div class="control-row">
+                <div class="control-group">
+                    <label>💰 Min Price</label>
+                    <input type="number" id="minPrice" value="2500">
+                </div>
+                <div class="control-group">
+                    <label>💰 Max Price</label>
+                    <input type="number" id="maxPrice" value="6500">
+                </div>
+                <div class="control-group">
+                    <label>🛏️ Min Bedrooms</label>
+                    <input type="number" id="minBedrooms" value="0">
+                </div>
+                <div class="control-group">
+                    <label>🛏️ Max Bedrooms</label>
+                    <input type="number" id="maxBedrooms" value="5">
+                </div>
+            </div>
+
+            <div class="control-row">
+                <div class="control-group">
+                    <label>📊 Sort By</label>
+                    <select id="sortBy">
+                        <option value="distance">Distance (Closest First)</option>
+                        <option value="price-low">Price (Low to High)</option>
+                        <option value="price-high">Price (High to Low)</option>
+                        <option value="newest">Newest Listings</option>
+                        <option value="days">Days on Market (Shortest)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="applyFilters()">🔍 Apply Filters</button>
+                <button class="btn-secondary" onclick="resetFilters()">↻ Reset Filters</button>
+                <button class="btn-success" onclick="refreshListings()">🔄 Refresh Data</button>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-box">
+                    <div class="stat-label">API Calls Used</div>
+                    <div class="stat-value"><span id="apiCallsUsed">0</span>/50</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Next Refresh</div>
+                    <div class="countdown" id="countdown">Ready</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Listings Loaded</div>
+                    <div class="stat-value" id="totalListings">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Showing</div>
+                    <div class="stat-value" id="displayedListings">0</div>
+                </div>
+            </div>
+
+            <div class="dropdown-section">
+                <button class="dropdown-btn" onclick="toggleDropdown('saved')">
+                    ⭐ Saved (<span id="savedCount">0</span>)
+                </button>
+                <button class="dropdown-btn" onclick="toggleDropdown('hidden')">
+                    👁️ Hidden (<span id="hiddenCount">0</span>)
+                </button>
+            </div>
+
+            <div id="savedDropdown" class="dropdown-content">
+                <div id="savedList"></div>
+            </div>
+
+            <div id="hiddenDropdown" class="dropdown-content">
+                <div id="hiddenList"></div>
+            </div>
+        </div>
+
+        <div class="listings-header" id="listingsHeader">Loading listings...</div>
+        <div id="listings"></div>
     </div>
 
-    <div id="listings"></div>
-
     <script>
+        // Global state
         let allListings = [];
+        let filteredListings = [];
+        let savedIds = new Set(JSON.parse(localStorage.getItem('savedListings') || '[]'));
+        let hiddenIds = new Set(JSON.parse(localStorage.getItem('hiddenListings') || '[]'));
+        let apiCallsUsed = parseInt(localStorage.getItem('apiCallsUsed') || '0');
+        let lastRefreshTime = parseInt(localStorage.getItem('lastRefreshTime') || '0');
+        const centerLat = 40.658249173169104;
+        const centerLng = -73.98223774928385;
+        const minRefreshInterval = 60; // seconds between refreshes
 
-        async function fetchListings() {
-            try {
-                const response = await fetch('https://rent-finder-production.up.railway.app/listings');
-                allListings = await response.json();
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadListings();
+            updateStats();
+            startCountdown();
+        });
+
+        // Load listings from localStorage or API
+        async function loadListings() {
+            const cached = localStorage.getItem('listings');
+            if (cached) {
+                allListings = JSON.parse(cached);
+                updateStats();
                 displayListings(allListings);
-            } catch (error) {
-                console.error('Error fetching listings:', error);
-                document.getElementById('listings').innerHTML = '<p>Error loading listings. Make sure the server is running.</p>';
+            } else {
+                await refreshListings();
             }
         }
 
-        function displayListings(listings) {
-            const container = document.getElementById('listings');
-            container.innerHTML = '';
-
-            if (listings.length === 0) {
-                container.innerHTML = '<p>No listings found.</p>';
+        // Fetch new listings from backend
+        async function refreshListings() {
+            const now = Date.now();
+            if (now - lastRefreshTime < minRefreshInterval * 1000) {
+                alert('Please wait at least ' + minRefreshInterval + ' seconds between refreshes');
                 return;
             }
 
-            listings.forEach(listing => {
-                const div = document.createElement('div');
-                div.className = 'listing';
-                div.innerHTML = `
-                    <h3>${listing.formattedAddress}</h3>
-                    <p><strong>Price:</strong> $${listing.price}</p>
-                    <p><strong>Bedrooms:</strong> ${listing.bedrooms || 'N/A'} | <strong>Bathrooms:</strong> ${listing.bathrooms || 'N/A'}</p>
-                    <p><strong>Type:</strong> ${listing.propertyType || 'N/A'}</p>
-                    <p><strong>Listed:</strong> ${new Date(listing.listedDate).toLocaleDateString()}</p>
-                    <p><strong>Days on Market:</strong> ${listing.daysOnMarket || 'N/A'}</p>
-                `;
-                container.appendChild(div);
-            });
+            try {
+                const response = await fetch('https://rent-finder-production.up.railway.app/refresh', {
+                    method: 'POST'
+                });
+                if (!response.ok) throw new Error('Refresh failed');
+
+                // Fetch the listings
+                const listResponse = await fetch('https://rent-finder-production.up.railway.app/listings');
+                allListings = await listResponse.json();
+                
+                // Update storage
+                localStorage.setItem('listings', JSON.stringify(allListings));
+                apiCallsUsed += 2; // One for refresh, one for listings
+                localStorage.setItem('apiCallsUsed', apiCallsUsed);
+                lastRefreshTime = now;
+                localStorage.setItem('lastRefreshTime', lastRefreshTime);
+
+                updateStats();
+                applyFilters();
+                startCountdown();
+            } catch (error) {
+                console.error('Error refreshing listings:', error);
+                alert('Error refreshing listings. Check console for details.');
+            }
         }
 
+        // Filter and sort listings
         function applyFilters() {
             const minPrice = parseInt(document.getElementById('minPrice').value) || 0;
             const maxPrice = parseInt(document.getElementById('maxPrice').value) || Infinity;
-            const minBedrooms = parseInt(document.getElementById('minBedrooms').value) || 0;
-            const maxBedrooms = parseInt(document.getElementById('maxBedrooms').value) || Infinity;
+            const minBeds = parseInt(document.getElementById('minBedrooms').value) || 0;
+            const maxBeds = parseInt(document.getElementById('maxBedrooms').value) || Infinity;
+            const sortBy = document.getElementById('sortBy').value;
 
-            const filtered = allListings.filter(listing => {
+            filteredListings = allListings.filter(listing => {
+                if (hiddenIds.has(listing.id)) return false;
                 return listing.price >= minPrice &&
                        listing.price <= maxPrice &&
-                       (listing.bedrooms || 0) >= minBedrooms &&
-                       (listing.bedrooms || 0) <= maxBedrooms;
+                       (listing.bedrooms || 0) >= minBeds &&
+                       (listing.bedrooms || 0) <= maxBeds;
             });
 
-            displayListings(filtered);
+            // Sort
+            filteredListings.sort((a, b) => {
+                switch (sortBy) {
+                    case 'distance':
+                        const distA = haversine(centerLat, centerLng, a.latitude, a.longitude);
+                        const distB = haversine(centerLat, centerLng, b.latitude, b.longitude);
+                        return distA - distB;
+                    case 'price-low':
+                        return a.price - b.price;
+                    case 'price-high':
+                        return b.price - a.price;
+                    case 'newest':
+                        return new Date(b.listedDate) - new Date(a.listedDate);
+                    case 'days':
+                        return (a.daysOnMarket || 999) - (b.daysOnMarket || 999);
+                    default:
+                        return 0;
+                }
+            });
+
+            displayListings(filteredListings);
+        }
+
+        // Display listings
+        function displayListings(listings) {
+            const container = document.getElementById('listings');
+            const header = document.getElementById('listingsHeader');
+
+            if (listings.length === 0) {
+                container.innerHTML = '<div class="empty-message">😢 No listings match your filters</div>';
+                header.textContent = 'No listings found';
+                document.getElementById('displayedListings').textContent = '0';
+                return;
+            }
+
+            header.textContent = `Found ${listings.length} apartment${listings.length !== 1 ? 's' : ''}`;
+            document.getElementById('displayedListings').textContent = listings.length;
+
+            container.innerHTML = '';
+            container.className = 'listings-grid';
+
+            listings.forEach(listing => {
+                const isSaved = savedIds.has(listing.id);
+                const distance = haversine(centerLat, centerLng, listing.latitude, listing.longitude);
+
+                const div = document.createElement('div');
+                div.className = `listing ${isSaved ? 'listing-saved' : ''}`;
+                div.innerHTML = `
+                    <div class="listing-header">
+                        <div class="listing-address">${listing.formattedAddress}</div>
+                        ${isSaved ? '<div class="badge">⭐ Saved</div>' : ''}
+                    </div>
+
+                    <div class="price">$${listing.price.toLocaleString()}/mo</div>
+
+                    <div class="property-info">
+                        <div class="info-item">
+                            <div class="info-label">🛏️ Bedrooms</div>
+                            <div class="info-value">${listing.bedrooms || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">🚿 Bathrooms</div>
+                            <div class="info-value">${listing.bathrooms || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">🏠 Type</div>
+                            <div class="info-value">${listing.propertyType || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">📏 Distance</div>
+                            <div class="info-value">${distance.toFixed(1)} km</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">📅 Listed</div>
+                            <div class="info-value">${new Date(listing.listedDate).toLocaleDateString()}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">⏱️ Days</div>
+                            <div class="info-value">${listing.daysOnMarket || 'N/A'}</div>
+                        </div>
+                    </div>
+
+                    ${listing.listingAgent ? `
+                        <div class="agent-info">
+                            <div class="agent-title">👤 Agent</div>
+                            <div class="agent-name">${listing.listingAgent.name || 'N/A'}</div>
+                            ${listing.listingAgent.phone ? `<div class="agent-contact">📞 ${listing.listingAgent.phone}</div>` : ''}
+                            ${listing.listingAgent.email ? `<div class="agent-contact">✉️ ${listing.listingAgent.email}</div>` : ''}
+                        </div>
+                    ` : ''}
+
+                    ${listing.listingOffice ? `
+                        <div class="agent-info">
+                            <div class="agent-title">🏢 Office</div>
+                            <div class="agent-name">${listing.listingOffice.name || 'N/A'}</div>
+                            ${listing.listingOffice.phone ? `<div class="agent-contact">📞 ${listing.listingOffice.phone}</div>` : ''}
+                            ${listing.listingOffice.email ? `<div class="agent-contact">✉️ ${listing.listingOffice.email}</div>` : ''}
+                        </div>
+                    ` : ''}
+
+                    <div class="listing-actions">
+                        <button class="btn-small btn-map" onclick="openMaps(${listing.latitude}, ${listing.longitude}, '${listing.formattedAddress}')">
+                            🗺️ Maps
+                        </button>
+                        <button class="btn-small ${isSaved ? 'btn-saved' : 'btn-save'}" onclick="toggleSave('${listing.id}')">
+                            ${isSaved ? '✓ Saved' : '⭐ Save'}
+                        </button>
+                        <button class="btn-small btn-hide" onclick="toggleHide('${listing.id}')">
+                            👁️ Hide
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
         }
 
         function resetFilters() {
@@ -84,11 +701,127 @@
             document.getElementById('maxPrice').value = 6500;
             document.getElementById('minBedrooms').value = 0;
             document.getElementById('maxBedrooms').value = 5;
-            displayListings(allListings);
+            document.getElementById('sortBy').value = 'distance';
+            applyFilters();
         }
 
-        // Load listings on page load
-        fetchListings();
+        function haversine(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        function openMaps(lat, lng, address) {
+            window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank');
+        }
+
+        function toggleSave(id) {
+            if (savedIds.has(id)) {
+                savedIds.delete(id);
+            } else {
+                savedIds.add(id);
+            }
+            localStorage.setItem('savedListings', JSON.stringify(Array.from(savedIds)));
+            updateStats();
+            displayListings(filteredListings);
+            updateSavedDropdown();
+        }
+
+        function toggleHide(id) {
+            if (hiddenIds.has(id)) {
+                hiddenIds.delete(id);
+            } else {
+                hiddenIds.add(id);
+            }
+            localStorage.setItem('hiddenListings', JSON.stringify(Array.from(hiddenIds)));
+            updateStats();
+            applyFilters();
+            updateHiddenDropdown();
+        }
+
+        function toggleDropdown(type) {
+            const dropdown = document.getElementById(type === 'saved' ? 'savedDropdown' : 'hiddenDropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        function updateSavedDropdown() {
+            const list = document.getElementById('savedList');
+            const count = savedIds.size;
+            document.getElementById('savedCount').textContent = count;
+
+            if (count === 0) {
+                list.innerHTML = '<p style="color: #999;">No saved listings yet</p>';
+                return;
+            }
+
+            list.innerHTML = '';
+            savedIds.forEach(id => {
+                const listing = allListings.find(l => l.id === id);
+                if (listing) {
+                    const item = document.createElement('div');
+                    item.className = 'saved-item';
+                    item.innerHTML = `
+                        <span class="saved-item-text">${listing.formattedAddress}<span class="saved-price">$${listing.price.toLocaleString()}</span></span>
+                        <button class="btn-small btn-warning" onclick="toggleSave('${id}')">Remove</button>
+                    `;
+                    list.appendChild(item);
+                }
+            });
+        }
+
+        function updateHiddenDropdown() {
+            const list = document.getElementById('hiddenList');
+            const count = hiddenIds.size;
+            document.getElementById('hiddenCount').textContent = count;
+
+            if (count === 0) {
+                list.innerHTML = '<p style="color: #999;">No hidden listings</p>';
+                return;
+            }
+
+            list.innerHTML = '';
+            hiddenIds.forEach(id => {
+                const listing = allListings.find(l => l.id === id);
+                if (listing) {
+                    const item = document.createElement('div');
+                    item.className = 'saved-item';
+                    item.innerHTML = `
+                        <span class="saved-item-text">${listing.formattedAddress}</span>
+                        <button class="btn-small btn-warning" onclick="toggleHide('${id}')">Unhide</button>
+                    `;
+                    list.appendChild(item);
+                }
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('apiCallsUsed').textContent = apiCallsUsed;
+            document.getElementById('totalListings').textContent = allListings.length;
+            document.getElementById('displayedListings').textContent = filteredListings.length || allListings.length;
+            updateSavedDropdown();
+            updateHiddenDropdown();
+        }
+
+        function startCountdown() {
+            function updateCountdown() {
+                const elapsed = (Date.now() - lastRefreshTime) / 1000;
+                const remaining = Math.max(0, minRefreshInterval - elapsed);
+                const countdown = document.getElementById('countdown');
+                
+                if (remaining <= 0) {
+                    countdown.textContent = 'Ready';
+                    countdown.style.color = '#38ef7d';
+                } else {
+                    countdown.textContent = Math.ceil(remaining) + 's';
+                    countdown.style.color = '#f5576c';
+                }
+            }
+
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
     </script>
 </body>
 </html>
