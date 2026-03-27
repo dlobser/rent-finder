@@ -510,8 +510,8 @@
         let filteredListings = [];
         let savedIds = new Set(JSON.parse(localStorage.getItem('savedListings') || '[]'));
         let hiddenIds = new Set(JSON.parse(localStorage.getItem('hiddenListings') || '[]'));
-        let apiCallsUsed = parseInt(localStorage.getItem('apiCallsUsed') || '0');
-        let lastRefreshTime = parseInt(localStorage.getItem('lastRefreshTime') || '0');
+        let apiCallsUsed = 0;
+        let lastRefreshTime = 0;
         const centerLat = 40.658249173169104;
         const centerLng = -73.98223774928385;
         const minRefreshInterval = 60; // Cooldown seconds between manual refreshes (prevents accidental clicks)
@@ -519,11 +519,25 @@
         // You control all API calls - with the 50/month limit, refresh strategically!
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            loadListings();
+        document.addEventListener('DOMContentLoaded', async () => {
+            await getStats();
+            await loadListings();
             updateStats();
             startCountdown();
         });
+
+        async function getStats() {
+            try {
+                const res = await fetch('https://rent-finder-production.up.railway.app/stats');
+                if (!res.ok) throw new Error('Stats endpoint error');
+                const stats = await res.json();
+                apiCallsUsed = stats.apiCallsUsed || 0;
+                lastRefreshTime = stats.lastRefreshTime || 0;
+                updateStats();
+            } catch (err) {
+                console.warn('Could not load shared stats; falling back to local state.', err);
+            }
+        }
 
         // Load listings from localStorage or API
         async function loadListings() {
@@ -569,13 +583,9 @@
 
                 // Now get the listings
                 await getDataFromServer();
-                
-                // Update API call count and timing
-                apiCallsUsed += 2; // One for refresh, one for listings
-                localStorage.setItem('apiCallsUsed', apiCallsUsed);
-                lastRefreshTime = now;
-                localStorage.setItem('lastRefreshTime', lastRefreshTime);
 
+                // Refresh shared stats from backend (apiCallsUsed included)
+                await getStats();
                 updateStats();
                 startCountdown();
             } catch (error) {

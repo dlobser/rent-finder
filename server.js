@@ -36,6 +36,32 @@ CREATE TABLE IF NOT EXISTS listings (
 )
 `).run();
 
+// API usage tracking
+db.prepare(`
+CREATE TABLE IF NOT EXISTS metadata (
+  key TEXT PRIMARY KEY,
+  value TEXT
+)
+`).run();
+
+const getMetadata = (key, defaultValue) => {
+  const row = db.prepare('SELECT value FROM metadata WHERE key = ?').get(key);
+  if (!row) return defaultValue;
+  return JSON.parse(row.value);
+};
+
+const setMetadata = (key, value) => {
+  db.prepare(`INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)`)
+    .run(key, JSON.stringify(value));
+};
+
+if (getMetadata('apiCallsUsed', null) === null) {
+  setMetadata('apiCallsUsed', 0);
+}
+if (getMetadata('lastRefreshTime', null) === null) {
+  setMetadata('lastRefreshTime', 0);
+}
+
 // ---- DISTANCE ----
 function haversine(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -137,7 +163,21 @@ app.post("/config", (req, res) => {
 // manual refresh
 app.post("/refresh", async (req, res) => {
   await fetchListings();
-  res.json({ success: true });
+
+  // bump API usage counter (shared in DB)
+  const calls = getMetadata('apiCallsUsed', 0) + 1;
+  setMetadata('apiCallsUsed', calls);
+  setMetadata('lastRefreshTime', Date.now());
+
+  res.json({ success: true, apiCallsUsed: calls, lastRefreshTime: Date.now() });
+});
+
+app.get("/stats", (req, res) => {
+  const stats = {
+    apiCallsUsed: getMetadata('apiCallsUsed', 0),
+    lastRefreshTime: getMetadata('lastRefreshTime', 0)
+  };
+  res.json(stats);
 });
 
 // ---- START ----
