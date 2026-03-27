@@ -11,7 +11,7 @@ app.use(express.json());
 const db = new Database("data.db");
 
 // ---- CONFIG ----
-const RENTCAST_API_KEY = "process.env.RENTCAST_API_KEY";
+const RENTCAST_API_KEY = process.env.RENTCAST_API_KEY;
 const BASE_URL = "https://api.rentcast.io/v1/listings";
 
 // default query (you can override via UI later)
