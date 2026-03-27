@@ -30,7 +30,7 @@
 
         async function fetchListings() {
             try {
-                const response = await fetch('http://localhost:3000/listings');
+                const response = await fetch('https://rent-finder-production.up.railway.app/listings');
                 allListings = await response.json();
                 displayListings(allListings);
             } catch (error) {
