@@ -69,7 +69,7 @@ async function fetchListings() {
         params: {
             zipCode: config.zip,
             price: `${config.minRent}:${config.maxRent}`,
-            limit: 50
+            limit: 500
         }
     });
 

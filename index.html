@@ -437,6 +437,10 @@
                     <label>🛏️ Max Bedrooms</label>
                     <input type="number" id="maxBedrooms" value="5">
                 </div>
+                <div class="control-group">
+                    <label>📅 Newer than (days)</label>
+                    <input type="number" id="maxDaysListed" value="365">
+                </div>
             </div>
 
             <div class="control-row">
@@ -455,7 +459,8 @@
             <div class="button-group">
                 <button class="btn-primary" onclick="applyFilters()">🔍 Apply Filters</button>
                 <button class="btn-secondary" onclick="resetFilters()">↻ Reset Filters</button>
-                <button class="btn-success" onclick="refreshListings()">🔄 Refresh Data</button>
+                <button class="btn-success" onclick="getDataFromServer()">📥 Get Data</button>
+                <button class="btn-success" onclick="refreshListings()">🔄 Refresh from API</button>
             </div>
 
             <div class="stats-bar">
@@ -528,7 +533,23 @@
                 updateStats();
                 displayListings(allListings);
             } else {
-                await refreshListings();
+                await getDataFromServer();
+            }
+        }
+
+        // Get listings from backend database (no API call)
+        async function getDataFromServer() {
+            try {
+                const listResponse = await fetch('https://rent-finder-production.up.railway.app/listings');
+                allListings = await listResponse.json();
+                
+                // Update storage
+                localStorage.setItem('listings', JSON.stringify(allListings));
+                updateStats();
+                applyFilters();
+            } catch (error) {
+                console.error('Error getting listings:', error);
+                alert('Error loading listings. Check console for details.');
             }
         }
 
@@ -546,19 +567,16 @@
                 });
                 if (!response.ok) throw new Error('Refresh failed');
 
-                // Fetch the listings
-                const listResponse = await fetch('https://rent-finder-production.up.railway.app/listings');
-                allListings = await listResponse.json();
+                // Now get the listings
+                await getDataFromServer();
                 
-                // Update storage
-                localStorage.setItem('listings', JSON.stringify(allListings));
+                // Update API call count and timing
                 apiCallsUsed += 2; // One for refresh, one for listings
                 localStorage.setItem('apiCallsUsed', apiCallsUsed);
                 lastRefreshTime = now;
                 localStorage.setItem('lastRefreshTime', lastRefreshTime);
 
                 updateStats();
-                applyFilters();
                 startCountdown();
             } catch (error) {
                 console.error('Error refreshing listings:', error);
@@ -572,10 +590,19 @@
             const maxPrice = parseInt(document.getElementById('maxPrice').value) || Infinity;
             const minBeds = parseInt(document.getElementById('minBedrooms').value) || 0;
             const maxBeds = parseInt(document.getElementById('maxBedrooms').value) || Infinity;
+            const maxDaysListed = parseInt(document.getElementById('maxDaysListed').value) || 999999;
             const sortBy = document.getElementById('sortBy').value;
+
+            const now = new Date();
+            const maxDaysAgo = new Date(now.getTime() - maxDaysListed * 24 * 60 * 60 * 1000);
 
             filteredListings = allListings.filter(listing => {
                 if (hiddenIds.has(listing.id)) return false;
+                
+                // Check if listing date is within acceptable range
+                const listedDate = new Date(listing.listedDate);
+                if (listedDate < maxDaysAgo) return false;
+                
                 return listing.price >= minPrice &&
                        listing.price <= maxPrice &&
                        (listing.bedrooms || 0) >= minBeds &&
@@ -673,12 +700,19 @@
                         </div>
                     ` : ''}
 
+                    ${listing.listingAgent ? `
+                        <div class="agent-info">
+                            <div class="agent-title">🌐 Agent Website</div>
+                            ${listing.listingAgent.website ? `<div class="agent-contact"><a href="${listing.listingAgent.website}" target="_blank" style="color: #667eea; text-decoration: none;">🔗 ${listing.listingAgent.website}</a></div>` : '<div class="agent-contact">No website</div>'}
+                        </div>
+                    ` : ''}
                     ${listing.listingOffice ? `
                         <div class="agent-info">
                             <div class="agent-title">🏢 Office</div>
                             <div class="agent-name">${listing.listingOffice.name || 'N/A'}</div>
                             ${listing.listingOffice.phone ? `<div class="agent-contact">📞 ${listing.listingOffice.phone}</div>` : ''}
                             ${listing.listingOffice.email ? `<div class="agent-contact">✉️ ${listing.listingOffice.email}</div>` : ''}
+                            ${listing.listingOffice.website ? `<div class="agent-contact"><a href="${listing.listingOffice.website}" target="_blank" style="color: #667eea; text-decoration: none;">🔗 ${listing.listingOffice.website}</a></div>` : ''}
                         </div>
                     ` : ''}
 
@@ -703,6 +737,7 @@
             document.getElementById('maxPrice').value = 6500;
             document.getElementById('minBedrooms').value = 0;
             document.getElementById('maxBedrooms').value = 5;
+            document.getElementById('maxDaysListed').value = 365;
             document.getElementById('sortBy').value = 'distance';
             applyFilters();
         }
