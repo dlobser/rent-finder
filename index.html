@@ -464,7 +464,7 @@
                     <div class="stat-value"><span id="apiCallsUsed">0</span>/50</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-label">Next Refresh</div>
+                    <div class="stat-label">Refresh Cooldown</div>
                     <div class="countdown" id="countdown">Ready</div>
                 </div>
                 <div class="stat-box">
@@ -509,7 +509,9 @@
         let lastRefreshTime = parseInt(localStorage.getItem('lastRefreshTime') || '0');
         const centerLat = 40.658249173169104;
         const centerLng = -73.98223774928385;
-        const minRefreshInterval = 60; // seconds between refreshes
+        const minRefreshInterval = 60; // Cooldown seconds between manual refreshes (prevents accidental clicks)
+        // NOTE: App does NOT auto-refresh. You manually click "Refresh Data" button to fetch new listings.
+        // You control all API calls - with the 50/month limit, refresh strategically!
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
@@ -814,7 +816,7 @@
                     countdown.textContent = 'Ready';
                     countdown.style.color = '#38ef7d';
                 } else {
-                    countdown.textContent = Math.ceil(remaining) + 's';
+                    countdown.textContent = 'Wait ' + Math.ceil(remaining) + 's';
                     countdown.style.color = '#f5576c';
                 }
             }
